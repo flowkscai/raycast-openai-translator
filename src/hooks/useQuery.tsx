@@ -1,5 +1,5 @@
-import { getPreferenceValues, getSelectedText, showToast, Toast, Clipboard } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Clipboard, Toast, getPreferenceValues, getSelectedText, showToast } from "@raycast/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface QueryHook {
   text: string;
@@ -46,8 +46,14 @@ export function useQuery(props: UseQueryProps): QueryHook {
   const [isLoading, setLoading] = useState<boolean>(false);
   const [querying, setQuerying] = useState<boolean>(false);
   const [ocrImage, setOcrImage] = useState<string | undefined>(initialOcr);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
+    if (initializedRef.current) {
+      return;
+    }
+    initializedRef.current = true;
+
     (async () => {
       let tmp = "";
       if (text.length == 0) {
@@ -63,19 +69,17 @@ export function useQuery(props: UseQueryProps): QueryHook {
               });
             }
           } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Selected text couldn't load",
-              message: String(error),
-            });
+            console.error("getSelectedText error:", error);
+          } finally {
+            setLoading(false);
           }
-          setLoading(false);
         }
+
         if (forceEnableAutoLoadClipboard || (isAutoLoadClipboard && tmp.length == 0)) {
           setLoading(true);
           try {
             const { text } = await Clipboard.read();
-            if (text.trim().length > 1) {
+            if (text && text.trim().length > 1) {
               tmp = text.trim();
               await showToast({
                 style: Toast.Style.Success,
@@ -88,9 +92,11 @@ export function useQuery(props: UseQueryProps): QueryHook {
               title: "Clipboard text couldn't load",
               message: String(error),
             });
+          } finally {
+            setLoading(false);
           }
-          setLoading(false);
         }
+
         if (tmp.length > 0) {
           setText(tmp);
         }

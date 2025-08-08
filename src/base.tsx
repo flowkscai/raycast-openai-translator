@@ -107,40 +107,40 @@ export default function getBase(
       apiModel,
     });
   }
-  if (provider) {
-    return (
-      <List
-        searchText={query.text}
-        isShowingDetail={!isInit && !isEmpty}
-        filtering={false}
-        isLoading={isInit}
-        selectedItemId={selectedId}
-        searchBarPlaceholder={`${capitalize(mode)}...`}
-        onSearchTextChange={query.updateText}
-        searchBarAccessory={
-          <LangDropdown
-            type={query.langType}
-            selectedStandardLang={query.langType == "To" ? query.to : query.from}
-            history={history}
-            onLangChange={query.langType == "To" ? query.updateTo : query.updateFrom}
+  return (
+    <List
+      searchText={query.text}
+      isShowingDetail={!isInit && !isEmpty}
+      filtering={false}
+      isLoading={isInit}
+      selectedItemId={selectedId}
+      searchBarPlaceholder={`${capitalize(mode)}...`}
+      onSearchTextChange={query.updateText}
+      searchBarAccessory={
+        <LangDropdown
+          type={query.langType}
+          selectedStandardLang={query.langType == "To" ? query.to : query.from}
+          history={history}
+          onLangChange={query.langType == "To" ? query.updateTo : query.updateFrom}
+        />
+      }
+      throttle={false}
+      navigationTitle={capitalize(mode)}
+      actions={
+        <ActionPanel>
+          {query.text && (
+            <Action title={capitalize(mode)} icon={Icon.Book} onAction={() => query.updateQuerying(true)} />
+          )}
+          <Action
+            title={`Switch to Translate ${query.langType == "To" ? "From" : "To"}`}
+            onAction={() => {
+              query.updateLangType(query.langType == "To" ? "From" : "To");
+            }}
           />
-        }
-        throttle={false}
-        navigationTitle={capitalize(mode)}
-        actions={
-          <ActionPanel>
-            {query.text && (
-              <Action title={capitalize(mode)} icon={Icon.Book} onAction={() => query.updateQuerying(true)} />
-            )}
-            <Action
-              title={`Switch to Translate ${query.langType == "To" ? "From" : "To"}`}
-              onAction={() => {
-                query.updateLangType(query.langType == "To" ? "From" : "To");
-              }}
-            />
-          </ActionPanel>
-        }
-      >
+        </ActionPanel>
+      }
+    >
+      {provider && (
         <ContentView
           query={query}
           history={history}
@@ -152,7 +152,7 @@ export default function getBase(
           setIsInit={setIsInit}
           setIsEmpty={setIsEmpty}
         />
-      </List>
-    );
-  }
+      )}
+    </List>
+  );
 }
